@@ -1,0 +1,113 @@
+Bước 1: Cài đặt Entity Framework
+Mở Package Manager Console trong Visual Studio và chạy lệnh sau:
+
+
+Copier
+Install-Package EntityFramework
+Bước 2: Tạo model Entity
+Tạo một lớp Student.cs với các thuộc tính tương ứng với bảng Students trong CSDL:
+
+csharp
+
+Copier
+public class Student
+{
+    public int Id { get; set; }
+    public string Name { get; set; }
+    public int Age { get; set; }
+    public string Class { get; set; }
+}
+Bước 3: Tạo lớp StudentContext.cs kế thừa từ DbContext để quản lý kết nối cơ sở dữ liệu và các bảng:
+
+csharp
+
+Copier
+public class StudentContext : DbContext
+{
+    public StudentContext() : base("name=StudentDBConnectionString")
+    {
+    }
+
+    public DbSet<Student> Students { get; set; }
+}
+Bước 4: Cấu hình chuỗi kết nối trong App.config:
+
+xml
+
+Copier
+<?xml version="1.0" encoding="utf-8"?>
+<configuration>
+  <configSections>
+    <!-- For more information on Entity Framework configuration, visit http://go.microsoft.com/fwlink/?LinkID=237468 -->
+    <section name="entityFramework" type="System.Data.Entity.Internal.ConfigFile.EntityFrameworkSection, EntityFramework, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" requirePermission="false" />
+  </configSections>
+  <connectionStrings>
+    <add name="StudentDBConnectionString" connectionString="Server=localhost;Database=StudentDB;User Id=dba;Password=demo123456;" providerName="System.Data.SqlClient" />
+  </connectionStrings>
+  <startup>
+    <supportedRuntime version="v4.0" sku=".NETFramework,Version=v4.7.2" />
+  </startup>
+  <entityFramework>
+    <providers>
+      <provider invariantName="System.Data.SqlClient" type="System.Data.Entity.SqlServer.SqlProviderServices, EntityFramework.SqlServer" />
+    </providers>
+  </entityFramework>
+</configuration>
+Bước 5: Tạo Database với Code First Migrations
+Mở Package Manager Console và chạy lệnh sau:
+
+
+Copier
+enable-migrations
+Sau đó, chạy lệnh để tạo database và các bảng:
+
+
+Copier
+add-migration InitialCreate
+update-database
+Bước 6: Tạo Winform UI
+Tạo một Winform mới và thêm các control như TextBox, Button, DataGridView vào form. Sau đó, thêm code để tương tác với CSDL:
+
+csharp
+
+Copier
+public partial class MainForm : Form
+{
+    private StudentContext context = new StudentContext();
+
+    public MainForm()
+    {
+        InitializeComponent();
+        LoadStudents();
+    }
+
+    private void LoadStudents()
+    {
+        dataGridView1.DataSource = context.Students.ToList();
+    }
+
+    private void btnSave_Click(object sender, EventArgs e)
+    {
+        var student = new Student
+        {
+            Name = textBoxName.Text,
+            Age = int.Parse(textBoxAge.Text),
+            Class = textBoxClass.Text
+        };
+
+        context.Students.Add(student);
+        context.SaveChanges();
+        LoadStudents();
+    }
+
+    private void btnDelete_Click(object sender, EventArgs e)
+    {
+        if (dataGridView1.SelectedRows.Count > 0)
+        {
+            var student = (Student)dataGridView1.SelectedRows[0].DataBoundItem;
+            context.Students.Remove(student);
+            context.SaveChanges();
+            LoadStudents();
+        }
+    }
+}
