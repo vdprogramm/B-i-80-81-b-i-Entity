@@ -1,0 +1,40 @@
+using System;
+using System.Threading;
+
+class Program
+{
+    static void Main(string[] args)
+    {
+        // Chạy hàm ff trong một luồng riêng
+        Thread thread = new Thread(FF);
+        thread.Start();
+
+        // Chờ cho luồng kết thúc
+        thread.Join();
+
+        Console.WriteLine("Đã thực hiện xong.");
+    }
+
+    static void FF()
+    {
+        // Vòng lặp vô hạn
+        while (true)
+        {
+            // Tạo số nguyên ngẫu nhiên
+            int n = new Random().Next();
+
+            // Kiểm tra nếu n chia hết cho 2025
+            if (n % 2025 == 0)
+            {
+                // Dừng vòng lặp
+                break;
+            }
+            else
+            {
+                // Hiển thị n và delay 100ms
+                Console.WriteLine(n);
+                Thread.Sleep(100);
+            }
+        }
+    }
+}
